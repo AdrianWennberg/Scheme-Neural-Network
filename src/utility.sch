@@ -21,6 +21,22 @@
     )
 )
 
+; Get the Nth element of a list
+(define (getN N L) 
+    (if (= N 0) 
+        (car L) 
+        (getN (- N 1) (cdr L))
+    )
+)
+
+; Get a random elemnt from a list
+(define (getRand L) 
+    (getN 
+        (floor (* (random) (length L))) 
+        L
+    )
+)
+
 ; Combines two lists by preforming the operation f on pairwise elements
 (define (combine L1 L2 f)
     (if (null? L1) 
@@ -50,4 +66,19 @@
 
 (define (randrange min max)
     (+ min (* (random) (- max min)))
+)
+
+
+
+(define (sig x) 
+    (/ 1 (+ 1 (exp (- x))))
+)
+
+
+(define (sigd x) 
+    (* (sig x) (- 1 (sig x)))
+)
+
+(define (siginv x) 
+    (log (/ x (- 1 x) ) )
 )

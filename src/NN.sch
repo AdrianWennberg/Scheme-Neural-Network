@@ -1,51 +1,188 @@
-(load "matrix.sch")
-(define trainData '((((1 0)) ((1)) )(((0 1)) ((1)) )(((0 0)) ((0)) )(((1 1)) ((0)) )))
+(load "src/utility.sch")
+(load "src/matrix/matrix.sch")
 
 
-(define newNN (lambda x
-    (if (or (null? x) (null? (cdr x))) () (cons (randomMatrix (+ (car x) 1) (cadr x)) (apply newNN (cdr x)))))) 
+; Creates a new neural networks with initial weights being random numbers up to 'lim'
+; and the the numbers of input, hidden, and output nodes given by the list 'layers'
+; E.G. layers = (4 5 6 2) implies 4 inputs, 2 hidden layers with 5 and 6 weights respectively
+; and 2 outputs. Biases are added automatically and need not be considered here.
+(define (newNN lim layers)
+    (if (or (null? layers) (null? (cdr layers))) 
+        () 
+        (cons 
+            (mapM (lambda (i) (* (- (* i lim) (/ lim 2.0)) 2.0)) (randM (cadr layers) (+ (car layers) 1))) 
+            (newNN lim (cdr layers))
+        )
+    )
+)
+
+; Adds a bias term to a 1xN row matrix
+(define (addBias R) 
+    (cons '(1) R)
+)
 
 
+; Removes a bias terms from a weight matrix
+(define (removeBiasWeights W) 
+    (if (null? W)
+        '()
+        (cons 
+            (cdr (car W)) 
+            (removeBiasWeights (cdr W))
+        )
+    )
+)
+
+
+(define (activate R M)
+    (prodMM M (addBias R))
+)
+
+; Computes a single layer activations
+(define (getOutput func activation ) 
+    (mapM func activation)
+)
+
+(define (ff R M ) 
+    (getOutput activationFunc (activate R M))
+)
+
+; Computes the predictions fro the network for the given input
 (define (runNN nn in)
-    (define (addBias R) (list (cons 1 (car R))))
-    (define (ff R M) (map (prodMM (addBias R) M) sig))
-    (if (null? nn) in (runNN (cdr nn) (ff in (car nn)))))
+    (if (null? nn) 
+        in 
+        (runNN (cdr nn) (ff in (car nn)))
+    )
+)
 
-(define (train nn trainData )
-    (define (get N L) (if (= N 0) (car L) (get (- N 1) (cdr L))))
+; Gives all input-activation-output triples foreach layer in a given prediction
+(define (layerData in nn) 
+    (if (null? nn) 
+        '()
+        ((lambda () 
+            (define input (addBias in))
+            (define activation (activate in (car nn)))
+            (define output (getOutput activationFunc activation))
+            (cons 
+                (list input activation output) 
+                (layerData output (cdr nn))
+            )
+        ))
+    )
+)
+
+; Calculates the error for an output
+(define (error expected output)
+    (prodCM 0.5 
+        ((lambda (x) (hadamardM x x)) 
+            (addM expected (mapM - output))
+        )
+    )
+)
+
+; Calculate the total error over a training set
+(define (totalError NN trainData)
+    (if (= (length trainData) 1)
+        (error (cadar trainData) (runNN NN (caar trainData)))
+        (addM 
+            (error (cadar trainData) (runNN NN (caar trainData)))
+            (totalError NN (cdr trainData))
+        )
+    )
+)
+
+
+; Computes the vector value for an output vector
+(define (deltaOut target output activations) 
+    (hadamardM 
+        (addM target (mapM - output)) 
+        (mapM activationFuncDeriv activations)
+    )
+) 
+
+; Computes the vector value for a hidden vector
+(define (deltaHidden deltaNext weightsNext activations) 
+    (hadamardM
+        (prodMM 
+            (transpose (removeBiasWeights weightsNext))
+            deltaNext
+        )
+        (mapM activationFuncDeriv activations)
+    ) 
+) 
+
+; Uses the delata values to compute the weight change of a weights matrix
+(define (weightChange learnRate delta inputs)
+    (prodMM  (prodCM learnRate delta) (transpose inputs))
+)
+
+
+(define (addWeights NN1 NN2) 
+    (if (null? NN1)
+        '()
+        (cons 
+            (addM (car NN1) (car NN2))
+            (addWeights (cdr NN1) (cdr NN2))
+        )
+    )
+)
+
+(define (train NN trainData learnRate)
+    ; Returns so far computed weight changes along with delta of next layer (delta-next (weight-changes))
+    (define (backpropagate NN data)
+        (if (= (length NN) 1) 
+            ((lambda (deltaOut)
+                (list deltaOut 
+                    (weightChange 
+                        learnRate 
+                        deltaOut 
+                        (caar data) 
+                    )
+                )
+            ) (deltaOut 
+                (cadr trainData)
+                (caddar data)
+                (cadar data)
+            ))
+            ((lambda (x)
+                (list 
+                    (deltaHidden (car x) (cadr NN) (cadar data))
+                    (cons 
+                        (weightChange learnRate (deltaHidden (car x) (cadr NN) (cadar data)) (caar data))
+                        (cdr x)
+                    )
+                )  
+            ) (backpropagate (cdr NN) (cdr data))
+            )
+        )
+    )
+    (cadr (backpropagate NN (layerData (car trainData) NN)))
+)
+
+(define (trainAll NN trainData learnRate)
+    (if (= (length trainData) 1)
+        (train NN (car trainData) learnRate) 
+        (addWeights 
+            (train NN (car trainData) learnRate) 
+            (trainAll NN (cdr trainData) learnRate)
+        )
+    )
+)
+
     
-    (define (data) 
-        (get (floor (* (random) (length trainData))) trainData))
+(define (trainLoop nn trainData i learnRate)
+    (if (= i 0) 
+        nn 
+        (trainLoop 
+            (addWeights
+                nn
+                (trainAll nn trainData learnRate)
+            )
+            trainData 
+            (- i 1)
+            learnRate
+        )
+    )
+)
     
-    (define (addBias R) (list (cons 1 (car R))))
-    (define (ff R M) (map (prodMM (addBias R) M) sig))
-    (define (results in nn) (if (null? nn) '()
-        ((lambda (in out) (cons (list in out) (results out (cdr nn)))) (addBias in) (ff in (car nn)))))
-    
-    (define (gradients res err) (map (hadamardM (map res sig') err) (lambda (x) (* x 100 )))) 
-    (define (deltas in gradients) (prodMM (transpose in) gradients))
-    (define (newWeights err in res weights) (addM weights (deltas in (gradients res err))) )
-    
-    (define (oNewWeihgts in exOut res weights) 
-        (define err (addM exOut (map  res -)))
-        (list err (newWeights err in res weights)))
-        
-    (define (hNewWeights in res nextErr nn) 
-        (define err (list (cdr (car (prodMM nextErr (transpose (cadr nn)))))))
-        (list err (newWeights err in res (car nn))))
-        
-    (define (backpropagate nn results data)
-        (if (= (length nn) 1) 
-            (oNewWeihgts (car (car results)) (cadr data) (cadr (car results)) (car nn))
-            ((lambda (x) (append  (hNewWeights (car (car results)) (cadr (car results)) (car x) nn) (cdr x)))
-                (backpropagate (cdr nn) (cdr results) data))))
-           
-    (cdr ((lambda (x) (backpropagate      nn       (results (car x) nn)  x)  ) (data))))
-    
-(define (trainLoop nn trainData i)
-    (if (= i 0) nn (trainLoop (train nn trainData)  trainData (- i 1))))
-    
-    
-(define (sig x) (/ 1 (+ 1 (exp (- x)))))
-(define (sig' x) (* x (- 1 x)))
 

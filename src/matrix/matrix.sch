@@ -50,6 +50,12 @@
     (combine M1 M2 addV)
 )
 
+; Multiply a matrix by a constant
+(define (prodCM C M)
+    (mapM (lambda (x) (* C x)) M)
+)
+
+; Multiply a matrix by a vector
 (define (prodVM V M)
     (if (null? M) 
         '() 

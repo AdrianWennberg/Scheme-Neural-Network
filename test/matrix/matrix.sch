@@ -27,6 +27,12 @@
 
 (addM M1 M2)
 
+; ------------------- prodCM tests -------------------
+(prodCM 2 ID3)
+(prodCM 3 M4)
+(prodCM -1 M2)
+(prodCM 2 M3)
+
 ; ------------------- prodVM tests -------------------
 (prodVM '(2 3 4) ID3)
 (prodVM '(2 3 4) M4)
@@ -38,6 +44,7 @@
 (prodMM ID3 ID3)
 (prodMM ID3 M2)
 (prodMM M4 M2)
+(prodMM '((1) (2) (3)) '((4 5 6)))
 
 
 ; ----------------- hadamardM tests ------------------
