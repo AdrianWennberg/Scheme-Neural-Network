@@ -1,7 +1,11 @@
 (load "src/NN.sch")
 ; testing is done for now using the XOR toy example of a training problem
-(define activationFunc sig)
-(define activationFuncDeriv sigD)
+
+; Setup activation functions as sigmoid
+(define hiddenActivationFunc sig)
+(define hiddenActivationFuncDeriv sigD)
+(define outputActivationFunc sig)
+(define outputActivationFuncDeriv sigD)
 
 ; ------------------ Data definition -----------------
 (define xorData 
@@ -47,7 +51,7 @@
 (display data)
 
 ; ----------- Compute true error of output -----------
-(error out testOut)
+(squaredError out testOut)
 
 ; ---- Errors and weight changes for output layer ----
 (define outData (car (cdr data)))

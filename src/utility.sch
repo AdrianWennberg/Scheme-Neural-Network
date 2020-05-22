@@ -7,6 +7,17 @@
     )
 )
 
+; Split a list after every Nth element
+(define (splitEveryN N L)
+    (cond ((null? L) '())
+        ((> N (length L)) (list L))
+        (#t (cons 
+            (carN N L) 
+            (splitEveryN N (cdrN N L)))
+        )
+    )
+)
+
 ; take the first N elements from L
 (define (carN N L)
     (cond   ((zero? N) ())
@@ -68,17 +79,32 @@
     (+ min (* (random) (- max min)))
 )
 
+ 
+; Activation functions and their derivatives
 
-
+; Sigmoid
 (define (sig x) 
     (/ 1 (+ 1 (exp (- x))))
 )
-
 
 (define (sigd x) 
     (* (sig x) (- 1 (sig x)))
 )
 
-(define (siginv x) 
-    (log (/ x (- 1 x) ) )
+; Linear
+(define (linear x)
+    x
+)
+
+(define (lineard x)
+    1
+)
+
+; Softmax (cannot do this with current setup)
+(define (softmax x)
+    x
+)
+
+(define (softmaxd x)
+    1
 )

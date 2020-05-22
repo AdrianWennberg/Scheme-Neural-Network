@@ -12,6 +12,11 @@
 (split 3 '(1 2 3 4 5 6))
 
 
+(splitEveryN 2 '(1 2 3 4 5 6))
+(splitEveryN 3 '(1 2 3 4 5 6 7 8))
+(splitEveryN 10 '(1 2 3 4 5 6 7 8))
+
+
 (getN 0 '(1 2 3 4 5 6 7 8 9 10))
 (getN 2 '(1 2 3 4 5 6 7 8 9 10))
 (getN 5 '(1 2 3 4 5 6 7 8 9 10))
@@ -57,8 +62,3 @@
 (sigd 0)
 (sigd 1)
 (sigd -1)
-
-
-(siginv (sig 0))
-(siginv (sig 1))
-(siginv (sig -1))

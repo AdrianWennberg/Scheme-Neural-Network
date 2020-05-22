@@ -43,51 +43,64 @@
     (mapM func activation)
 )
 
-(define (ff R M ) 
-    (getOutput activationFunc (activate R M))
+(define (ff func R M ) 
+    (getOutput func (activate R M))
 )
 
 ; Computes the predictions fro the network for the given input
-(define (runNN nn in)
-    (if (null? nn) 
-        in 
-        (runNN (cdr nn) (ff in (car nn)))
+(define (runNN NN in)
+    (if (= 1 (length NN))
+        (ff outputActivationFunc in (car NN))
+        (runNN (cdr NN) (ff hiddenActivationFunc in (car NN)))
     )
 )
 
 ; Gives all input-activation-output triples foreach layer in a given prediction
-(define (layerData in nn) 
-    (if (null? nn) 
-        '()
+(define (layerData in NN) 
+    (if (= 1 (length NN))
+        ; For Output layer
         ((lambda () 
             (define input (addBias in))
-            (define activation (activate in (car nn)))
-            (define output (getOutput activationFunc activation))
+            (define activation (activate in (car NN)))
+            (define output (getOutput outputActivationFunc activation))
+            (list (list input activation output))
+        ))
+        ; for Hidden Layers
+        ((lambda () 
+            (define input (addBias in))
+            (define activation (activate in (car NN)))
+            (define output (getOutput hiddenActivationFunc activation))
             (cons 
                 (list input activation output) 
-                (layerData output (cdr nn))
+                (layerData output (cdr NN))
             )
         ))
     )
 )
 
 ; Calculates the error for an output
-(define (error expected output)
-    (prodCM 0.5 
-        ((lambda (x) (hadamardM x x)) 
+(define (squaredError expected output)
+    ((lambda (x) (hadamardM x x)) 
             (addM expected (mapM - output))
-        )
     )
 )
 
 ; Calculate the total error over a training set
-(define (totalError NN trainData)
+(define (totalSquaredError NN trainData)
     (if (= (length trainData) 1)
-        (error (cadar trainData) (runNN NN (caar trainData)))
+        (squaredError (cadar trainData) (runNN NN (caar trainData)))
         (addM 
-            (error (cadar trainData) (runNN NN (caar trainData)))
-            (totalError NN (cdr trainData))
+            (squaredError (cadar trainData) (runNN NN (caar trainData)))
+            (totalSquaredError NN (cdr trainData))
         )
+    )
+)
+
+; Calculate the average error over a training set
+(define (MSE NN trainData)
+    (mapM 
+        (lambda (x) (/ x (length trainData)))
+        (totalSquaredError NN trainData)
     )
 )
 
@@ -96,7 +109,7 @@
 (define (deltaOut target output activations) 
     (hadamardM 
         (addM target (mapM - output)) 
-        (mapM activationFuncDeriv activations)
+        (mapM outputActivationFuncDeriv activations)
     )
 ) 
 
@@ -107,7 +120,7 @@
             (transpose (removeBiasWeights weightsNext))
             deltaNext
         )
-        (mapM activationFuncDeriv activations)
+        (mapM hiddenActivationFuncDeriv activations)
     ) 
 ) 
 
@@ -169,19 +182,49 @@
     )
 )
 
+
+(define (trainAllBatches NN trainData batchSize learnRate)
+    (define (trainBatches NN batches)
+        (if (null? batches) 
+            NN
+            (trainBatches 
+                (addWeights
+                    NN
+                    (trainAll NN (car batches) learnRate)
+                )
+                (cdr batches)
+            )
+        )
+    )
+    (trainBatches NN (splitEveryN batchSize trainData))
+)
+
     
-(define (trainLoop nn trainData i learnRate)
+(define (trainLoop NN trainData i learnRate)
     (if (= i 0) 
-        nn 
+        NN 
         (trainLoop 
             (addWeights
-                nn
-                (trainAll nn trainData learnRate)
+                NN
+                (trainAll NN trainData learnRate)
             )
             trainData 
             (- i 1)
             learnRate
         )
+    )
+)
+
+(define (trainLoopBatch NN trainData i batchSize learnRate)
+    (if (= i 0) 
+        NN 
+        (trainLoopBatch 
+            (trainAllBatches NN trainData batchSize learnRate)
+            trainData 
+            (- i 1)
+            batchSize
+            learnRate
+        )    
     )
 )
     
