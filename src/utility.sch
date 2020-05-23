@@ -71,11 +71,11 @@
     )
 )
 
-(define (randmax max)
+(define (randMax max)
     (* (random) max)
 )
 
-(define (randrange min max)
+(define (randRange min max)
     (+ min (* (random) (- max min)))
 )
 

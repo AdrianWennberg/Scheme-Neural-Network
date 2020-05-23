@@ -21,7 +21,7 @@
 (define maxStartWeight 1)
 (define learningRate 10)
 (define hiddenNodes 5)
-(define iterations 100)
+(define iterations 200)
 
 
 ; ------------ Creating the Neural Network -----------
@@ -40,5 +40,7 @@
 (runNN trained '((1) (0)))
 (runNN trained '((1) (1)))
 
-(MSE untrained xorData)
-(MSE trained xorData)
+(avgMSE untrained xorData)
+(avgMSE trained xorData)
+
+(runtime)

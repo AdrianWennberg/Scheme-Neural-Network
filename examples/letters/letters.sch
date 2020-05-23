@@ -48,8 +48,8 @@
 (runNN trained (caar trainData))
 
 
-(define trainError (MSE trained trainData))
-(define testError (MSE trained testData))
+(define trainError (avgMSE trained trainData))
+(define testError (avgMSE trained testData))
 (display trainError)
 (display testError)
 (/ (reduce-left + 0 (car (transpose trainError))) 26)

@@ -79,28 +79,33 @@
 )
 
 ; Calculates the error for an output
-(define (squaredError expected output)
-    ((lambda (x) (hadamardM x x)) 
-            (addM expected (mapM - output))
+(define (MSE expected output)
+    (/ 
+        (apply + (map car 
+            ((lambda (x) (hadamardM x x)) 
+                (addM expected (mapM - output))
+            )
+        ))
+        (rows output)
     )
 )
 
 ; Calculate the total error over a training set
-(define (totalSquaredError NN trainData)
+(define (totalMSE NN trainData)
     (if (= (length trainData) 1)
-        (squaredError (cadar trainData) (runNN NN (caar trainData)))
-        (addM 
-            (squaredError (cadar trainData) (runNN NN (caar trainData)))
-            (totalSquaredError NN (cdr trainData))
+        (MSE (cadar trainData) (runNN NN (caar trainData)))
+        (+ 
+            (MSE (cadar trainData) (runNN NN (caar trainData)))
+            (totalMSE NN (cdr trainData))
         )
     )
 )
 
 ; Calculate the average error over a training set
-(define (MSE NN trainData)
-    (mapM 
-        (lambda (x) (/ x (length trainData)))
-        (totalSquaredError NN trainData)
+(define (avgMSE NN trainData)
+    (/ 
+        (totalMSE NN trainData)
+        (length trainData)
     )
 )
 

@@ -21,8 +21,9 @@
 (define NN (newNN 0.01 '(2 3 1)))
 (display NN)
 
-(define testIn '((0) (0)))
-(define testOut '((1)))
+
+(define testIn (caar xorData))
+(define testOut (cadar xorData))
 
 
 ; --------------- Adding bias to a row ---------------
@@ -34,8 +35,7 @@
 
 
 ; ------------- Computing activations  ---------------
-(define a1 (activate testIn (car NN)))
-(display a1)
+(activate testIn (car NN))
 
 ; ------------ Computing results directly ------------
 (getOutput sig (activate testIn (car NN)))
@@ -51,7 +51,7 @@
 (display data)
 
 ; ----------- Compute true error of output -----------
-(squaredError out testOut)
+(MSE out testOut)
 
 ; ---- Errors and weight changes for output layer ----
 (define outData (car (cdr data)))
@@ -85,12 +85,11 @@
 
 
 
-; ----------- Single itteration of training ----------
+; ----------- Single iteration of training ----------
 
-(train NN '(((1) (0)) ((1))) 0.01)
+(train NN (car xorData) 0.01)
 (trainAll NN xorData 0.01)
 
-
-; ------------ Ten itterations of training -----------
+; ------------ Ten iterations of training -----------
 
 (trainLoop NN xorData 10 0.01)

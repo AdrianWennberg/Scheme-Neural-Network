@@ -42,14 +42,14 @@
 (random)
 (random)
 
-(randmax 5)
-(randmax 5)
-(randmax 5)
+(randMax 5)
+(randMax 5)
+(randMax 5)
 
-(randrange 5 10)
-(randrange 5 10)
-(randrange 5 10)
-(randrange 5 10)
+(randRange 5 10)
+(randRange 5 10)
+(randRange 5 10)
+(randRange 5 10)
 
 
 ; -------------- Activation functions ----------------

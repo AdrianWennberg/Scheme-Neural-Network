@@ -28,8 +28,8 @@
 (define untrained (newNN maxStartWeight (list 4 hiddenNodes 1)))
 (define trained (trainLoopBatch untrained trainData iterations batchSize learningRate))
 
-(MSE untrained trainData)
-(MSE trained trainData)
+(avgMSE untrained trainData)
+(avgMSE trained trainData)
 
-(MSE untrained testData)
-(MSE trained testData)
+(avgMSE untrained testData)
+(avgMSE trained testData)
