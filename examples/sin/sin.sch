@@ -10,11 +10,7 @@
      (sinData 150)
 )
 
-
-
-
-
-; Setup activation function s. Sigmoid for diffen and linear for output
+; Setup activation functions. Sigmoid for hidden and linear for output
 (define hiddenActivationFunc sig)
 (define hiddenActivationFuncDeriv sigD)
 (define outputActivationFunc linear)
@@ -37,8 +33,3 @@
 
 (MSE untrained testData)
 (MSE trained testData)
-
-(caadr testData)
-(cadadr testData)
-(runNN untrained (caadr testData))
-(runNN trained (caadr testData))

@@ -20,7 +20,7 @@
     (define (IDRow N i)
         (cond 
             ((zero? N) '())
-            ((eq? N  i) (cons 1 (IDRow (-1+ N) i)))
+            ((= N  i) (cons 1 (IDRow (-1+ N) i)))
             (#t (cons 0 (IDRow (-1+ N) i)))
         )
     )
@@ -71,7 +71,7 @@
             (cons (prodVM (car M1) M2) (multTransposed (cdr M1) M2))
         )
     )
-        
+    
     (multTransposed M1 (transpose M2))
 )
 

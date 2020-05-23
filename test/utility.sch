@@ -59,6 +59,6 @@
 (sig -1)
 
 
-(sigd 0)
-(sigd 1)
-(sigd -1)
+(sigD 0)
+(sigD 1)
+(sigD -1)

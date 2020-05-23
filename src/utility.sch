@@ -87,7 +87,7 @@
     (/ 1 (+ 1 (exp (- x))))
 )
 
-(define (sigd x) 
+(define (sigD x) 
     (* (sig x) (- 1 (sig x)))
 )
 
@@ -96,15 +96,15 @@
     x
 )
 
-(define (lineard x)
+(define (linearD x)
     1
 )
 
 ; Softmax (cannot do this with current setup)
 (define (softmax x)
-    x
+    0
 )
 
 (define (softmaxd x)
-    1
+    0
 )
