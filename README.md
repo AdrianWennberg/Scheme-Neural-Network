@@ -17,8 +17,8 @@ This executes the file given by the path. for example to run the XOR example, ru
 
 If you want to play around with the library, you can create a scm file and copy one of the examples. You should be able to get pretty far by playing around with this and looking at the scheme and SCMUTILS reference:
 
-<https://groups.csail.mit.edu/mac/ftpdir/scheme-7.4/doc-html/scheme_2.html>
-<https://groups.csail.mit.edu/mac/users/gjs/6946/refman.txt>
+- [Scheme Reference](https://groups.csail.mit.edu/mac/ftpdir/scheme-7.4/doc-html/scheme_2.html)
+- [SCMUTILS Reference](https://groups.csail.mit.edu/mac/users/gjs/6946/refman.txt)
 
 I would appreciate any feedback and I am happy to respond to any comments, questions, or feature requests!
 
