@@ -1,10 +1,11 @@
 # Scheme-Neural-Network
+
 An attempt at creating a neural network library using functional programming in the Scheme dialect of Lisp/.
 
 ## How I run the code
 
 Install MIT Scheme and SCMUTILS
-http://groups.csail.mit.edu/mac/users/gjs/6946/installation.html
+<http://groups.csail.mit.edu/mac/users/gjs/6946/installation.html>
 
 Once you have setup SCMUTILS to run from the command line with the "mechanics" script, open a terminal in the root folder of this repository and run the command:
 > mechanics < "path"
