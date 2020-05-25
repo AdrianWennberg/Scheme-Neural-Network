@@ -1,4 +1,3 @@
-(load "src/matrix/matrix.sch")
 (load "src/utility.sch")
 
 ; We are using an MIT letter recognition dataset. More info here:
@@ -7,6 +6,11 @@
 ; Turns a capital letter to an integer with A->0, B->1, ...
 (define (charToInt c)
     (- (char->integer c) 65)
+)
+
+; Turns an integer to a capital letter with A->0, B->1, ...
+(define (intToChar c)
+    (integer->char (+ c 65))
 )
 
 ; Turns a integer character to an integer with 0->0, 1->1, ...
@@ -24,14 +28,33 @@
     (cond 
         ((zero? L) '())
         ((zero? N) (cons 
-            '(1) 
+            1 
             (createOutputVector (- N 1) (- L 1))
         ))
         (#t (cons 
-            '(0) 
+            0 
             (createOutputVector (- N 1) (- L 1))
         ))
     )
+)
+
+; Gets the predicted value from an output vector
+(define (predicted outputV)
+    (define (maxIndex L)
+        (if (null? L ) 
+            '(-1 0)
+            ((lambda (prev) 
+                (if (> (car L) (car prev))
+                    (list (car L) 0)
+                    (list (car prev) (+ 1 (cadr prev)))
+                )
+            )
+            (maxIndex (cdr L))
+            )
+        ) 
+    )
+
+    (intToChar (cadr (maxIndex (vector->list outputV))))
 )
 
 ; Reads a number from an input port.
@@ -65,8 +88,8 @@
     (define outputIndex (charToInt (read-char inputPort)))
     (read-char inputPort)
     (list 
-        (transpose (list (reverse (readInputData inputPort 16)))) 
-        (createOutputVector outputIndex 26)
+        (apply vector (reverse (readInputData inputPort 16)))
+        (apply vector (createOutputVector outputIndex 26))
     )
 )
 
@@ -86,49 +109,9 @@
 
 (define (splitTrainTest data proportion)
     (split 
-        (floor (* (length data) proportion)) 
+        (floor->exact (* (length data) proportion)) 
         data
     )
 )
-
-(define file (open-input-file "examples/letters/data-sample.data"))
-
-(define outputLetter (read-char file))
-
-(display outputLetter)
-(charToInt outputLetter)
-
-(read-char file)
-(numToInt (read-char file))
-
-
-(read-char file)
-(numToInt (read-char file))
-
-(isInt? #\T)
-(isInt? #\0)
-(isInt? #\9)
-
-(list->string (list #\0 #\9 #\1) )
-
-(readNumber (open-input-string "ABC"))
-(readNumber (open-input-string "21C"))
-(readNumber (open-input-string "123"))
-
-(define input (open-input-string "2,8,3,5,1,8,13,0,6,6,10,8,0,8,0,8"))
-
-(readNumber input)
-(readNumber input)
-(readNumber input)
-
-(define input (open-input-string "2,8,3,5,1,8,13,0,6,6,10,8,0,8,0,8"))
-
-(readInputData input 16)
-
-
-(define input (open-input-file "examples/letters/data-sample.data"))
-
-(readLine input)
-(readLine input)
 
 

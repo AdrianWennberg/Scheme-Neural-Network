@@ -1,3 +1,4 @@
 testing.sch
-/tmp
-/fast
+tmp/
+slow/
+runs/

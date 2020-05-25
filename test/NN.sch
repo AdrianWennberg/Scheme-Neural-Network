@@ -7,15 +7,17 @@
 (define outputActivationFunc sig)
 (define outputActivationFuncDeriv sigD)
 
+
 ; ------------------ Data definition -----------------
 (define xorData 
-    '(
-        (((0) (0)) ((0)))
-        (((0) (1)) ((1)))
-        (((1) (0)) ((1)))
-        (((1) (1)) ((0)))
+    (list
+        (list (vector 0 0) (vector 0))
+        (list (vector 0 1) (vector 1))
+        (list (vector 1 0) (vector 1))
+        (list (vector 1 1) (vector 0))
     )
 )
+
 
 ; ----------- Creating a new Neural Network ----------
 (define NN (newNN 0.01 '(2 3 1)))
@@ -25,14 +27,11 @@
 (define testIn (caar xorData))
 (define testOut (cadar xorData))
 
-
 ; --------------- Adding bias to a row ---------------
-(addBias '((1) (2) (3)))
-
+(addBias (vector 1 2 3))
 
 ; ------- Remove bias weights from a matrix ----------
-(removeBiasWeights '((1 2 3) (2 4 5) (3 5 6)))
-
+(removeBiasWeights (matrix-by-rows '(1 2 3) '(2 4 5) '(3 5 6)))
 
 ; ------------- Computing activations  ---------------
 (activate testIn (car NN))
@@ -43,15 +42,17 @@
 
 
 ; --------- Running the NN to get prediction ---------
-(define out (runNN NN testIn ))
+(define out (runNN NN testIn))
 (display out)
 
 ; ----- Computing all activations layer by layer -----
 (define data (layerData testIn NN))
 (display data)
 
+
 ; ----------- Compute true error of output -----------
 (MSE out testOut)
+
 
 ; ---- Errors and weight changes for output layer ----
 (define outData (car (cdr data)))

@@ -1,6 +1,8 @@
 
 (load "src/NN.sch")
 (load "examples/sin/createData.sch")
+(load "src/dataFormatter.sch")
+
 ; ------------------ Data definition -----------------
 (define testData 
      (sinData 50)
@@ -24,12 +26,46 @@
 (define batchSize 10)
 
 
+; Setup file for logging experiment data
+(define formatHolder (getDataFormatter "examples/sin/runs/" "sin" 6))
+(define formatter (car formatHolder))
+(define infoFormatter (cadr formatHolder))
+(define networkWriter (caddr formatHolder))
+(define closeFiles (cadddr formatHolder))
+
+
 ; ------------ Creating the Neural Network -----------
 (define untrained (newNN maxStartWeight (list 4 hiddenNodes 1)))
-(define trained (trainLoopBatch untrained trainData iterations batchSize learningRate))
+
+; ------------ Training the Neural Network -----------
+(define startTime (runtime))
+(define trained (trainLoopBatchRecording untrained trainData iterations batchSize learningRate testData formatter))
+(define trainTime (- (runtime) startTime))
 
 (avgMSE untrained trainData)
 (avgMSE trained trainData)
 
 (avgMSE untrained testData)
 (avgMSE trained testData)
+
+(define trainError (avgMSE trained trainData))
+(define testError (avgMSE trained testData))
+
+(runNN trained (caar testData))
+(cadar testData)
+
+(runtime)
+
+(networkWriter trained)
+
+(infoFormatter 
+        maxStartWeight 
+        learningRate
+        hiddenNodes
+        iterations
+        batchSize
+        trainTime
+        trainError
+        testError)
+
+(closeFiles)

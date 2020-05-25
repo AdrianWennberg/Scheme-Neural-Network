@@ -62,3 +62,14 @@
 (sigD 0)
 (sigD 1)
 (sigD -1)
+
+
+(padZeros 5 "1")
+(padZeros 3 "123")
+(padZeros 0 "1234")
+
+(decoded-time/file-name-time (local-decoded-time))
+(decoded-time/file-name-time (global-decoded-time))
+(decoded-time/file-name-time (make-decoded-time 0 0 0 1 1 1900))
+
+(getCurrentTimeString)

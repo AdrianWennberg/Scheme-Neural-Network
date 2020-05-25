@@ -1,0 +1,30 @@
+
+(define digits 4)
+(define power (expt 10 digits))
+
+(define (showData NN N data)
+    (if (zero? N)
+        ((lambda () 
+            (newline)
+            (display (predicted (cadar data))) 
+            (display (cadar data))
+            (newline)
+            (display (predicted (runNN NN (caar data))))
+            (display ((v:elementwise (lambda (x) (/ (round (* x power)) power))) (runNN NN (caar data))))
+        ))
+        (showData NN (- N 1) (cdr data))
+    )
+)
+
+(define (showNData NN N data offset)
+    (cond 
+        ((zero? N) '())
+        ((zero? offset) 
+            (showData 0 data)
+            (newline)
+            (showNData NN (- N 1) (cdr data) offset)
+        )
+        (#t (showNData NN N (cdr data) (- offset 1)))
+    )
+)
+

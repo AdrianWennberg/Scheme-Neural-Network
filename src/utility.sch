@@ -108,3 +108,33 @@
 (define (softmaxd x)
     0
 )
+
+; Pads zeros at the beginning of a string up to the specified length L
+(define (padZeros L str)
+    (if (<= L (string-length str))
+        str
+        (padZeros L (string-append "0" str))
+    )
+)
+
+; Gets the specified time as a uniformly formatted time string.
+(define (decoded-time/file-name-time time)
+    (string-append 
+        (padZeros 4 (number->string (decoded-time/year time)))
+        (padZeros 2 (number->string (decoded-time/month time)))
+        (padZeros 2 (number->string (decoded-time/day time)))
+        (padZeros 2 (number->string (decoded-time/hour time)))
+        (padZeros 2 (number->string (decoded-time/minute time)))
+        (padZeros 2 (number->string (decoded-time/second time)))
+    )
+)
+
+; Gets the current time as a uniformly formatted time string.
+(define (getCurrentTimeString)
+    (decoded-time/file-name-time (local-decoded-time))
+)
+
+; Floors a number with number of digits given by the multiplicand
+(define (floorN x M)
+    (/ (floor (* M x)) M)
+)

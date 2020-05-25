@@ -1,5 +1,4 @@
 (load "src/utility.sch")
-(load "src/matrix/matrix.sch")
 
 
 ; Creates a new neural networks with initial weights being random numbers up to 'lim'
@@ -10,7 +9,7 @@
     (if (or (null? layers) (null? (cdr layers))) 
         () 
         (cons 
-            (mapM (lambda (i) (* (- (* i lim) (/ lim 2.0)) 2.0)) (randM (cadr layers) (+ (car layers) 1))) 
+            (m:generate (cadr layers) (+ (car layers) 1) (lambda (i j) (randRange (- 1) 1)))
             (newNN lim (cdr layers))
         )
     )
@@ -18,29 +17,28 @@
 
 ; Adds a bias term to a 1xN row matrix
 (define (addBias R) 
-    (cons '(1) R)
+    (apply vector (cons 1 (vector->list  R)))
 )
 
 
 ; Removes a bias terms from a weight matrix
 (define (removeBiasWeights W) 
-    (if (null? W)
-        '()
-        (cons 
-            (cdr (car W)) 
-            (removeBiasWeights (cdr W))
-        )
+    (m:submatrix W
+        0
+        (m:num-rows W)
+        1
+        (m:num-cols W)
     )
 )
 
 
 (define (activate R M)
-    (prodMM M (addBias R))
+    (* M (addBias R))
 )
 
 ; Computes a single layer activations
 (define (getOutput func activation ) 
-    (mapM func activation)
+    ((vector:elementwise func) activation)
 )
 
 (define (ff func R M ) 
@@ -81,12 +79,8 @@
 ; Calculates the error for an output
 (define (MSE expected output)
     (/ 
-        (apply + (map car 
-            ((lambda (x) (hadamardM x x)) 
-                (addM expected (mapM - output))
-            )
-        ))
-        (rows output)
+        (apply + (vector->list ((v:elementwise square) (- expected output))))
+        (vector-length expected)
     )
 )
 
@@ -101,7 +95,7 @@
     )
 )
 
-; Calculate the average error over a training set
+; Calculate the average Mean Squared Error over a training set
 (define (avgMSE NN trainData)
     (/ 
         (totalMSE NN trainData)
@@ -112,26 +106,30 @@
 
 ; Computes the vector value for an output vector
 (define (deltaOut target output activations) 
-    (hadamardM 
-        (addM target (mapM - output)) 
-        (mapM outputActivationFuncDeriv activations)
+    ((v:elementwise *) 
+        (- target output)
+        ((v:elementwise outputActivationFuncDeriv) activations)
     )
 ) 
 
 ; Computes the vector value for a hidden vector
 (define (deltaHidden deltaNext weightsNext activations) 
-    (hadamardM
-        (prodMM 
-            (transpose (removeBiasWeights weightsNext))
+    ((v:elementwise *)
+        (* 
+            (m:transpose (removeBiasWeights weightsNext))
             deltaNext
         )
-        (mapM hiddenActivationFuncDeriv activations)
+        ((v:elementwise hiddenActivationFuncDeriv) activations)
     ) 
 ) 
 
-; Uses the delata values to compute the weight change of a weights matrix
+; Uses the delta values to compute the weight change of a weights matrix
 (define (weightChange learnRate delta inputs)
-    (prodMM  (prodCM learnRate delta) (transpose inputs))
+    (apply matrix-by-rows 
+        (map vector->list (vector->list 
+            (* inputs (* learnRate delta) )
+        ))
+    )
 )
 
 
@@ -139,7 +137,7 @@
     (if (null? NN1)
         '()
         (cons 
-            (addM (car NN1) (car NN2))
+            (+ (car NN1) (car NN2))
             (addWeights (cdr NN1) (cdr NN2))
         )
     )
@@ -233,4 +231,25 @@
     )
 )
     
-
+(define (trainLoopBatchRecording NN trainData i batchSize learnRate testData dataFormatter)
+    (if (= i 0) 
+        ((lambda ()
+            (dataFormatter 0 (avgMSE NN testData))
+            NN 
+        ))
+        ((lambda () 
+            (define prevEpoch (trainLoopBatchRecording 
+                NN
+                trainData 
+                (- i 1)
+                batchSize
+                learnRate
+                testData
+                dataFormatter
+            ))
+            (define result (trainAllBatches prevEpoch trainData batchSize learnRate))
+            (dataFormatter i (avgMSE result testData))
+            result
+        ))    
+    )
+)
