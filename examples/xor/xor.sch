@@ -20,9 +20,9 @@
 
 
 (define maxStartWeight 0.5)
-(define learningRate 10)
+(define learningRate 100)
 (define hiddenNodes 5)
-(define iterations 100)
+(define iterations 500)
 (define batchSize 4)
 
 
